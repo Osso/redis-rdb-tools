@@ -20,15 +20,15 @@ Example : %prog --command json -k "user.*" /var/redis/6379/dump.rdb"""
     parser.add_option("-k", "--key", dest="keys", default=None,
                   help="Keys to export. This can be a regular expression")
     parser.add_option("-t", "--type", dest="types", action="append",
-                  help="""Data types to include. Possible values are string, hash, set, sortedset, list. Multiple typees can be provided. 
+                  help="""Data types to include. Possible values are string, hash, set, sortedset, list. Multiple typees can be provided.
                     If not specified, all data types will be returned""")
-    
+
     (options, args) = parser.parse_args()
-    
+
     if len(args) == 0:
         parser.error("Redis RDB file not specified")
     dump_file = args[0]
-    
+
     filters = {}
     if options.dbs:
         filters['dbs'] = []
@@ -37,10 +37,10 @@ Example : %prog --command json -k "user.*" /var/redis/6379/dump.rdb"""
                 filters['dbs'].append(int(x))
             except ValueError:
                 raise Exception('Invalid database number %s' %x)
-    
+
     if options.keys:
         filters['keys'] = options.keys
-    
+
     if options.types:
         filters['types'] = []
         for x in options.types:
@@ -48,7 +48,7 @@ Example : %prog --command json -k "user.*" /var/redis/6379/dump.rdb"""
                 raise Exception('Invalid type provided - %s. Expected one of %s' % (x, (", ".join(VALID_TYPES))))
             else:
                 filters['types'].append(x)
-    
+
     # TODO : Fix this ugly if-else code
     if options.output:
         with open(options.output, "wb") as f:
@@ -80,7 +80,7 @@ Example : %prog --command json -k "user.*" /var/redis/6379/dump.rdb"""
 
         parser = RdbParser(callback, filters=filters)
         parser.parse(dump_file)
-    
+
 if __name__ == '__main__':
     main()
 
