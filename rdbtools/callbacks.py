@@ -100,12 +100,12 @@ class JSONCallback(RdbCallback):
         self._is_first_db = True
         self._has_databases = False
         self._is_first_key_in_db = True
-        self._elements_in_key = 0 
+        self._elements_in_key = 0
         self._element_index = 0
-        
+
     def start_rdb(self):
         self._out.write('[')
-    
+
     def start_database(self, db_number):
         if not self._is_first_db:
             self._out.write('},')
@@ -116,7 +116,7 @@ class JSONCallback(RdbCallback):
 
     def end_database(self, db_number):
         pass
-        
+
     def end_rdb(self):
         if self._has_databases:
             self._out.write('}')
@@ -129,31 +129,31 @@ class JSONCallback(RdbCallback):
         self._is_first_key_in_db = False
         self._elements_in_key = length
         self._element_index = 0
-    
+
     def _end_key(self, key):
         pass
-    
+
     def _write_comma(self):
         if self._element_index > 0 and self._element_index < self._elements_in_key :
             self._out.write(',')
         self._element_index = self._element_index + 1
-        
+
     def set(self, key, value, expiry, info):
         self._start_key(key, 0)
         self._out.write('%s:%s' % (encode_key(key), encode_value(value)))
-    
+
     def start_hash(self, key, length, expiry, info):
         self._start_key(key, length)
         self._out.write('%s:{' % encode_key(key))
-    
+
     def hset(self, key, field, value):
         self._write_comma()
         self._out.write('%s:%s' % (encode_key(field), encode_value(value)))
-    
+
     def end_hash(self, key):
         self._end_key(key)
         self._out.write('}')
-    
+
     def start_set(self, key, cardinality, expiry, info):
         self._start_key(key, cardinality)
         self._out.write('%s:[' % encode_key(key))
@@ -161,99 +161,99 @@ class JSONCallback(RdbCallback):
     def sadd(self, key, member):
         self._write_comma()
         self._out.write('%s' % encode_value(member))
-    
+
     def end_set(self, key):
         self._end_key(key)
         self._out.write(']')
-    
+
     def start_list(self, key, length, expiry, info):
         self._start_key(key, length)
         self._out.write('%s:[' % encode_key(key))
-    
+
     def rpush(self, key, value) :
         self._write_comma()
         self._out.write('%s' % encode_value(value))
-    
+
     def end_list(self, key):
         self._end_key(key)
         self._out.write(']')
-    
+
     def start_sorted_set(self, key, length, expiry, info):
         self._start_key(key, length)
         self._out.write('%s:{' % encode_key(key))
-    
+
     def zadd(self, key, score, member):
         self._write_comma()
         self._out.write('%s:%s' % (encode_key(member), encode_value(score)))
-    
+
     def end_sorted_set(self, key):
         self._end_key(key)
         self._out.write('}')
 
 
 class DiffCallback(RdbCallback):
-    '''Prints the contents of RDB in a format that is unix sort friendly, 
+    '''Prints the contents of RDB in a format that is unix sort friendly,
         so that two rdb files can be diffed easily'''
     def __init__(self, out):
         self._out = out
         self._index = 0
         self._dbnum = 0
-        
+
     def start_rdb(self):
         pass
-    
+
     def start_database(self, db_number):
         self._dbnum = db_number
 
     def end_database(self, db_number):
         pass
-        
+
     def end_rdb(self):
         pass
-       
+
     def set(self, key, value, expiry, info):
         self._out.write('db=%d %s -> %s' % (self._dbnum, encode_key(key), encode_value(value)))
         self.newline()
-    
+
     def start_hash(self, key, length, expiry, info):
         pass
-    
+
     def hset(self, key, field, value):
         self._out.write('db=%d %s . %s -> %s' % (self._dbnum, encode_key(key), encode_key(field), encode_value(value)))
         self.newline()
-    
+
     def end_hash(self, key):
         pass
-    
+
     def start_set(self, key, cardinality, expiry, info):
         pass
 
     def sadd(self, key, member):
         self._out.write('db=%d %s { %s }' % (self._dbnum, encode_key(key), encode_value(member)))
         self.newline()
-    
+
     def end_set(self, key):
         pass
-    
+
     def start_list(self, key, length, expiry, info):
         self._index = 0
-            
+
     def rpush(self, key, value) :
         self._out.write('db=%d %s[%d] -> %s' % (self._dbnum, encode_key(key), self._index, encode_value(value)))
         self.newline()
         self._index = self._index + 1
-    
+
     def end_list(self, key):
         pass
-    
+
     def start_sorted_set(self, key, length, expiry, info):
         self._index = 0
-    
+
     def zadd(self, key, score, member):
         self._out.write('db=%d %s[%d] -> {%s, score=%s}' % (self._dbnum, encode_key(key), self._index, encode_key(member), encode_value(score)))
         self.newline()
         self._index = self._index + 1
-    
+
     def end_sorted_set(self, key):
         pass
 
@@ -274,7 +274,8 @@ class ProtocolCallback(RdbCallback):
         self._expires = {}
 
     def set_expiry(self, key, dt):
-        self._expires[key] = dt
+        pass
+        # self._expires[key] = dt
 
     def get_expiry_seconds(self, key):
         if key in self._expires:
